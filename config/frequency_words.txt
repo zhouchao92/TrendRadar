@@ -1,7 +1,7 @@
 java
 !javascript
 python
-@10
+@15
 
 ai
 !gai
@@ -21,14 +21,12 @@ openai
 sora
 deepseek
 qwen
-@5
 
 国产
 中国
 美国
 日本
 韩国
-@3
 
 科技
 腾讯
@@ -38,7 +36,6 @@ qwen
 淘宝
 百度
 小米
-@5
 
 中国电信
 中国移动
@@ -46,4 +43,4 @@ qwen
 华为
 中兴
 烽火
-@3
+
