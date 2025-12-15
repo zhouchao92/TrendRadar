@@ -1,7 +1,9 @@
 java
 !javascript
+@10
+
 python
-@15
+@10
 
 ai
 !gai
