@@ -181,7 +181,7 @@ jobs:
           # 恢复本次更改
           git stash pop || echo "Nothing to pop"
           
-          git add index.html
+          git add -A
           
           if git diff --quiet && git diff --staged --quiet; then
             echo "📭 No changes to commit"
