@@ -182,7 +182,7 @@ jobs:
           git stash pop || echo "No stashed changes to restore"
 
           # 显式添加你要提交的文件
-          git add index.html
+          git add index.html output
 
           # 检查是否有实际变更需要提交
           if git diff --quiet && git diff --staged --quiet; then
@@ -205,7 +205,7 @@ jobs:
             git stash push --include-untracked || true
             git pull --rebase origin $BRANCH_NAME
             git stash pop || true
-            git add index.html
+            git add index.html output
             git commit --amend --no-edit  # 更新提交（可选）
             git push origin $BRANCH_NAME --force-with-lease
           fi
