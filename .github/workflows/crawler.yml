@@ -168,39 +168,46 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
-          
-          echo "🔄 Syncing with remote (branch: $BRANCH_NAME)..."
+
+          echo "🔄 Fetching latest from remote (branch: $BRANCH_NAME)..."
           git fetch origin $BRANCH_NAME
-          
-          # 保存当前更改
-          git stash --include-untracked || echo "Nothing to stash"
-          
-          # 同步到远程最新
+
+          # 保存当前所有更改（包括 untracked）
+          git stash push --include-untracked -m "auto-stash" || echo "No local changes to stash"
+
+          # 重置到远程最新状态
           git reset --hard origin/$BRANCH_NAME
-          
-          # 恢复本次更改
-          git stash pop || echo "Nothing to pop"
-          
+
+          # 恢复更改（如果有）
+          git stash pop || echo "No stashed changes to restore"
+
+          # 显式添加你要提交的文件
           git add index.html
-          
+
+          # 检查是否有实际变更需要提交
           if git diff --quiet && git diff --staged --quiet; then
             echo "📭 No changes to commit"
             exit 0
           fi
-          
+
           echo "📝 Committing changes..."
           TIMESTAMP=$(TZ=Asia/Shanghai date "+%Y-%m-%d %H:%M:%S")
           git commit -m "Auto update by GitHub Actions at $TIMESTAMP"
-          
-          echo "⬆️ Pushing changes with retry..."
-          for i in {1..3}; do
-            git pull --rebase origin $BRANCH_NAME && git push origin $BRANCH_NAME && {
-              echo "✅ Successfully pushed on attempt $i"
-              exit 0
-            }
-            echo "⚠️ Attempt $i failed, waiting $((i*3)) seconds..."
-            sleep $((i * 3))
-          done
-          
-          echo "❌ Failed to push after 3 attempts"
-          exit 1
+
+          echo "⬆️ Pushing changes..."
+          # 直接推送，无需 pull --rebase，因为我们已经 reset 到最新
+          # 如果担心并发冲突，可加 --force-with-lease（更安全的 force）
+          if ! git push origin $BRANCH_NAME; then
+            echo "⚠️ Push failed. Trying to pull latest and rebase manually..."
+
+            # 极端情况：推送失败（比如有人抢先推送），则尝试 rebase
+            # 先确保工作区干净（再次 stash）
+            git stash push --include-untracked || true
+            git pull --rebase origin $BRANCH_NAME
+            git stash pop || true
+            git add index.html
+            git commit --amend --no-edit  # 更新提交（可选）
+            git push origin $BRANCH_NAME --force-with-lease
+          fi
+
+          echo "✅ Successfully pushed"
