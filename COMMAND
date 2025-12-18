@@ -1,0 +1,228 @@
+# 设置gh关联仓库
+gh repo set-default zhouchao92/TrendRadar
+
+# 启动crawler工作流
+gh workflow run crawler.yml --ref master
+
+# 启动check in 工作流
+gh workflow run clean-crawler.yml --ref master
+
+
+# 列出仓库中的所有workflow
+gh workflow list
+
+# 查看已禁用的workflow
+gh workflow list --all
+
+
+1. gh run list - 查看workflow运行列表
+# 查看最近的所有workflow运行
+gh run list
+
+# 查看指定workflow的运行
+gh run list --workflow=ci.yml
+
+# 查看特定状态的运行
+gh run list --status=success
+gh run list --status=failure
+
+# 查看特定事件的运行
+gh run list --event=pull_request
+gh run list --event=workflow_dispatch
+
+# 限制显示数量
+gh run list --limit=10
+2. gh run watch - 监控workflow运行状态
+# 监控指定的workflow运行（交互式选择）
+gh run watch
+
+# 监控特定的运行ID
+gh run watch 15835284005
+
+# 紧凑模式显示（只显示相关/失败的步骤）
+gh run watch --compact
+
+# 如果运行失败则退出状态码非零
+gh run watch --exit-status
+
+# 设置刷新间隔
+gh run watch --interval=5
+3. gh run view - 查看具体运行详情
+# 查看特定运行的详细信息
+gh run view 15835284005
+
+# 使用JSON格式输出详细内容
+gh run view 15835284005 --json
+
+# 在浏览器中打开运行详情页面
+gh run view -w 15835284005
+4. gh workflow list - 列出所有可用的workflow
+# 列出仓库中的所有workflow
+gh workflow list
+
+# 查看已禁用的workflow
+gh workflow list --all
+5. gh workflow view - 查看workflow配置
+# 查看特定workflow的配置详情
+gh workflow view ci.yml
+
+# 在浏览器中打开workflow页面
+gh workflow view -w ci.yml
+实用组合示例
+# 触发workflow并监控执行
+gh workflow run deploy.yml -f environment=production && \
+gh run watch --exit-status
+
+# 查看最新运行的详细信息
+gh run list --limit=1 && \
+gh run view $(gh run list --limit=1 --json number | jq -r '.[0].number')
+
+# 使用JSON格式获取运行状态
+gh run list --json number,status,conclusion,event,createdAt
+
+# 结合通知命令，运行完成后发送通知
+gh run watch 15835284005 && echo "Workflow completed!"
+状态码说明
+success - 成功完成
+failure - 运行失败
+cancelled - 被取消
+timed_out - 超时
+in_progress - 进行中
+queued - 排队中
+neutral - 中性结果
+实用小技巧
+# 获取最后一个运行的ID
+LAST_RUN=$(gh run list --limit=1 --json databaseId | jq -r '.[0].databaseId')
+
+# 查看最后一个运行的详细状态
+gh run view $LAST_RUN
+
+# 如果最后一个运行失败，重新运行
+gh run rerun $LAST_RUN
+这些命令让你可以全面监控workflow的执行状态，从触发到完成的全过程都能通过命令行轻松管理。
+
+
+gh 绑定远程仓库和本地仓库
+edit
+根据搜索结果，我来详细说明如何使用 GitHub CLI 绑定远程仓库和本地仓库：
+
+1. 使用 gh repo clone 克隆仓库（推荐方式）
+gh repo clone 是最简单的方式，它会自动设置好本地和远程仓库的关联：
+
+# 克隆仓库（会自动绑定远程）
+gh repo clone owner/repo-name
+
+# 克隆到指定目录
+gh repo clone owner/repo-name my-directory
+
+# 克隆个人仓库（可省略用户名）
+gh repo clone my-repo
+优点是克隆仓库时会自动：
+
+设置 origin 远程指向克隆的仓库
+如果是fork的仓库，还会自动添加 upstream 远程指向原始仓库
+2. 手动绑定现有本地仓库
+如果你的本地仓库已经存在，可以使用以下命令绑定：
+
+查看当前远程配置
+git remote -v
+添加远程仓库
+# 添加远程仓库作为 origin
+git remote add origin https://github.com/owner/repo-name.git
+
+# 或者使用 SSH
+git remote add origin git@github.com:owner/repo-name.git
+使用 gh 命令设置默认仓库
+# 设置当前仓库的默认远程仓库
+gh repo set-default owner/repo-name
+
+# 查看当前默认仓库
+gh repo view
+3. gh 与 Git 远程操作的常用命令
+查看远程信息
+# 查看当前仓库的GitHub信息
+gh repo view
+
+# 查看仓库的详细信息
+gh repo view --web
+
+# 列出所有远程分支
+git branch -r
+推送和拉取
+# 推送到远程（gh 会自动处理默认远程）
+git push
+
+# 从远程拉取最新代码
+git pull
+
+# 如果push失败，gh 会提示选择推送目标
+git push
+# 如果本地分支未设置远程追踪，gh 会询问：
+# ? Where should we push the 'branch-name' branch?
+4. 处理 fork 仓库的特殊情况
+对于 fork 的仓库，gh 有特殊处理：
+
+# 克隆fork的仓库（会自动设置 upstream）
+gh repo clone your-username/original-repo
+
+# 进入仓库后查看远程配置
+cd repo-name
+git remote -v
+# 会看到：
+# origin    https://github.com/your-username/original-repo.git
+# upstream  https://github.com/original-owner/original-repo.git
+
+# 从上游拉取最新更改
+git fetch upstream
+git merge upstream/main
+5. 实用配置命令
+认证配置
+# 首先需要登录认证
+gh auth login
+
+# 查看认证状态
+gh auth status
+仓库配置
+# 设置默认编辑器（可选）
+gh config set editor vim
+
+# 查看所有配置
+gh config list
+6. 完整的工作流程示例
+# 1. 登录GitHub
+gh auth login
+
+# 2. 克隆仓库（自动绑定）
+gh repo clone owner/repo-name
+
+# 3. 进入仓库
+cd repo-name
+
+# 4. 创建新分支
+git checkout -b feature-branch
+
+# 5. 进行修改并提交
+git add .
+git commit -m "Add new feature"
+
+# 6. 推送分支（gh 会处理远程绑定）
+git push
+
+# 7. 创建Pull Request
+gh pr create
+
+# 8. 监控CI状态
+gh run watch
+7. 故障排查
+如果遇到远程绑定问题：
+
+# 检查当前远程配置
+git remote -v
+
+# 如果远程配置错误，可以删除后重新添加
+git remote remove origin
+git remote add origin https://github.com/owner/repo-name.git
+
+# 或者使用 gh 重新设置默认仓库
+gh repo set-default owner/repo-name
+
