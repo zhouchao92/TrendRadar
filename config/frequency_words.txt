@@ -1,12 +1,16 @@
+后端
 java
 !javascript
 python
-spring
-redis
-postgres
-mysql
-elasticsearch
-@15
+数据库
+缓存
+框架
+@10
+
+前端
+vue
+react
+@5
 
 ai
 !gai
@@ -24,7 +28,7 @@ qwen
 美国
 日本
 韩国
-@5
+@10
 
 科技
 腾讯
